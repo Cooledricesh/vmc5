@@ -52,7 +52,8 @@ export const searchPlaces = async (
     const { items } = response.data;
 
     const transformedItems = [];
-    for (const item of items ?? []) {
+    for (let i = 0; i < (items ?? []).length; i++) {
+      const item = items[i];
       const parsed = NaverSearchItemSchema.safeParse(item);
       if (!parsed.success) {
         continue;
@@ -68,13 +69,17 @@ export const searchPlaces = async (
         continue;
       }
 
+      const placeId = extractPlaceId(parsed.data.link);
+
       transformedItems.push({
         title: stripHtml(parsed.data.title),
         address: stripHtml(parsed.data.address),
         category: parsed.data.category,
         latitude,
         longitude,
-        naver_place_id: extractPlaceId(parsed.data.link),
+        naver_place_id: placeId.includes('_fallback')
+          ? `${placeId}_${i}`
+          : placeId,
       });
     }
 

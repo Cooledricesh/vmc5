@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useNaverMap } from '../hooks/useNaverMap';
 import { usePlacesWithReviews } from '../hooks/usePlacesWithReviews';
 import { useMapMarkers } from '../hooks/useMapMarkers';
+import { useSelectedPlace } from '../stores/selected-place-store';
 import { MapSearchBar } from './MapSearchBar';
+import { ReviewFloatingButton } from './ReviewFloatingButton';
 import type { PlaceRow } from '@/features/places/lib/dto';
 
 export const NaverMap = () => {
   const router = useRouter();
+  const { selectedPlace } = useSelectedPlace();
 
   const { mapRef, map, isLoading: isMapLoading, error: mapError } = useNaverMap({
     onAuthFailed: () => {
@@ -30,6 +33,14 @@ export const NaverMap = () => {
     },
     [router]
   );
+
+  const handleReviewWrite = useCallback(() => {
+    if (selectedPlace) {
+      // 장소 정보는 이미 useSelectedPlace store에 저장되어 있으므로
+      // 리뷰 작성 페이지에서 해당 store를 읽어서 사용
+      router.push('/reviews/new');
+    }
+  }, [selectedPlace, router]);
 
   useMapMarkers({
     map,
@@ -66,6 +77,12 @@ export const NaverMap = () => {
 
       {/* 검색창 - 지도 로딩 완료 후 표시 */}
       {!isMapLoading && !mapError && <MapSearchBar map={map} />}
+
+      {/* 리뷰 작성 버튼 - 장소가 선택된 경우만 표시 */}
+      <ReviewFloatingButton
+        visible={!!selectedPlace}
+        onReviewWrite={handleReviewWrite}
+      />
 
       {/* 리뷰 로딩 에러 */}
       {placesError && (

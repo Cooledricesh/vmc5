@@ -14,6 +14,26 @@ export interface NaverMarker {
   setPosition(latLng: NaverLatLng): void;
 }
 
+export interface NaverPoint {
+  x: number;
+  y: number;
+}
+
+export interface NaverSize {
+  width: number;
+  height: number;
+}
+
+export interface NaverInfoWindow {
+  open(map: NaverMap, marker: NaverMarker): void;
+  close(): void;
+}
+
+export enum NaverAnimation {
+  BOUNCE = 1,
+  DROP = 2,
+}
+
 declare global {
   interface Window {
     naver: {
@@ -21,6 +41,10 @@ declare global {
         Map: new (element: HTMLElement, options: any) => NaverMap;
         LatLng: new (lat: number, lng: number) => NaverLatLng;
         Marker: new (options: any) => NaverMarker;
+        Point: new (x: number, y: number) => NaverPoint;
+        Size: new (width: number, height: number) => NaverSize;
+        InfoWindow: new (options: any) => NaverInfoWindow;
+        Animation: typeof NaverAnimation;
         Event: {
           addListener(instance: any, eventName: string, handler: () => void): void;
         };
