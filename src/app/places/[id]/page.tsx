@@ -13,10 +13,12 @@ import { PLACE_DETAIL_MESSAGES, REDIRECT_DELAY_MS } from '@/features/place-detai
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSelectedPlace } from '@/features/map/stores/selected-place-store';
 
 export default function PlaceDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { setSelectedPlace } = useSelectedPlace();
   const placeId = parseInt(params.id as string, 10);
 
   // placeId 유효성 검사
@@ -104,7 +106,19 @@ export default function PlaceDetailPage() {
   };
 
   const handleWriteReview = () => {
-    router.push(`/reviews/new?placeId=${placeId}`);
+    if (!place) return;
+
+    // 장소 정보를 selectedPlace store에 저장
+    setSelectedPlace({
+      title: place.name,
+      address: place.address,
+      category: place.category || '',
+      latitude: place.latitude,
+      longitude: place.longitude,
+      naver_place_id: place.naver_place_id,
+    });
+
+    router.push('/reviews/new');
   };
 
   return (
