@@ -10,8 +10,8 @@ export const usePlaceReviews = (placeId: number | null) => {
         throw new Error('Place ID is required');
       }
 
-      const response = await apiClient.get(`/places/${placeId}/reviews`);
-      const validated = ReviewListResponseSchema.safeParse(response);
+      const response = await apiClient.get(`/api/places/${placeId}/reviews`);
+      const validated = ReviewListResponseSchema.safeParse(response.data);
 
       if (!validated.success) {
         throw new Error('Invalid response format');
