@@ -3,9 +3,30 @@ let isMapSdkLoaded = false;
 let isMapSdkLoading = false;
 let loadPromise: Promise<void> | null = null;
 
+// window.naver.maps가 준비될 때까지 대기
+const waitForNaverMaps = (maxAttempts = 50, interval = 100): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+
+    const checkNaverMaps = () => {
+      attempts++;
+
+      if (typeof window !== 'undefined' && window.naver?.maps) {
+        resolve();
+      } else if (attempts >= maxAttempts) {
+        reject(new Error('Naver Maps SDK initialization timeout'));
+      } else {
+        setTimeout(checkNaverMaps, interval);
+      }
+    };
+
+    checkNaverMaps();
+  });
+};
+
 export const loadNaverMapSdk = (): Promise<void> => {
   // 이미 로드됨
-  if (isMapSdkLoaded) {
+  if (isMapSdkLoaded && window.naver?.maps) {
     return Promise.resolve();
   }
 
@@ -22,10 +43,18 @@ export const loadNaverMapSdk = (): Promise<void> => {
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`;
     script.async = true;
 
-    script.onload = () => {
-      isMapSdkLoaded = true;
-      isMapSdkLoading = false;
-      resolve();
+    script.onload = async () => {
+      try {
+        // SDK 파일 로드 후 window.naver.maps 초기화 대기
+        await waitForNaverMaps();
+        isMapSdkLoaded = true;
+        isMapSdkLoading = false;
+        resolve();
+      } catch (error) {
+        isMapSdkLoading = false;
+        loadPromise = null;
+        reject(error);
+      }
     };
 
     script.onerror = () => {

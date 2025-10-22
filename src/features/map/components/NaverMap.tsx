@@ -23,6 +23,7 @@ export const NaverMap = () => {
     error: placesError,
   } = usePlacesWithReviews();
 
+  // useCallback으로 함수 메모이제이션
   const handleMarkerClick = useCallback(
     (place: PlaceRow) => {
       router.push(`/places/${place.id}`);
@@ -36,36 +37,37 @@ export const NaverMap = () => {
     onMarkerClick: handleMarkerClick,
   });
 
-  if (isMapLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">지도를 불러오는 중...</div>
-      </div>
-    );
-  }
-
-  if (mapError) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-red-600">
-          지도 로딩 실패: {mapError}
-          <button
-            onClick={() => window.location.reload()}
-            className="ml-4 rounded bg-blue-500 px-4 py-2 text-white"
-          >
-            다시 시도
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative h-screen w-full">
+      {/* 지도 컨테이너 - 항상 렌더링 */}
       <div ref={mapRef} className="h-full w-full" />
 
-      <MapSearchBar map={map} />
+      {/* 로딩 오버레이 */}
+      {isMapLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white">
+          <div className="text-lg">지도를 불러오는 중...</div>
+        </div>
+      )}
 
+      {/* 에러 오버레이 */}
+      {mapError && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white">
+          <div className="text-red-600">
+            지도 로딩 실패: {mapError}
+            <button
+              onClick={() => window.location.reload()}
+              className="ml-4 rounded bg-blue-500 px-4 py-2 text-white"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 검색창 - 지도 로딩 완료 후 표시 */}
+      {!isMapLoading && !mapError && <MapSearchBar map={map} />}
+
+      {/* 리뷰 로딩 에러 */}
       {placesError && (
         <div className="absolute bottom-4 left-4 rounded bg-red-100 p-4 text-red-700">
           리뷰 정보를 불러오는 데 실패했습니다.
