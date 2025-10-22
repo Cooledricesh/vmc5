@@ -118,7 +118,7 @@ export const useMapMarkerActions = ({
         // 인포윈도우 생성 (인라인 스타일 사용, XSS 방지)
         const info = new window.naver.maps.InfoWindow({
           content: `
-            <div style="padding: 12px; min-width: 200px; background: white; border-radius: 8px;">
+            <div style="padding: 12px; min-width: 200px; max-width: 280px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
               <h4 style="font-weight: bold; color: #111827; margin: 0; margin-bottom: 4px;">
                 ${escapeHtml(place.title)}
               </h4>
@@ -129,7 +129,9 @@ export const useMapMarkerActions = ({
           `,
           borderWidth: 0,
           backgroundColor: 'transparent',
-          anchorSize: new window.naver.maps.Size(10, 10),
+          anchorSize: new window.naver.maps.Size(0, 0),
+          anchorSkew: true,
+          pixelOffset: new window.naver.maps.Point(20, -20),
         });
 
         info.open(map, marker);
