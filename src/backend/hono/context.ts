@@ -8,6 +8,12 @@ export type AppConfig = {
     url: string;
     serviceRoleKey: string;
   };
+  naver?: {
+    search: {
+      clientId: string;
+      clientSecret: string;
+    };
+  };
 };
 
 export type AppVariables = {
