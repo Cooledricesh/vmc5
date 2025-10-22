@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +23,7 @@ export const ReviewForm = () => {
   const { toast } = useToast();
   const { selectedPlace, clearSelectedPlace } = useSelectedPlace();
   const { mutate: createReview, isPending } = useCreateReview();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     watch,
@@ -39,6 +41,22 @@ export const ReviewForm = () => {
   });
 
   const formValues = watch();
+
+  // 리다이렉트 중에는 로딩 표시
+  if (isRedirecting) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">
+            리뷰가 저장되었습니다
+          </h2>
+          <p className="text-gray-600">
+            장소 페이지로 이동 중입니다...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // 장소 정보가 없으면 에러
   if (!selectedPlace) {
@@ -76,6 +94,9 @@ export const ReviewForm = () => {
             title: '리뷰가 저장되었습니다',
             description: '장소 페이지로 이동합니다.',
           });
+          // 리다이렉트 상태로 변경
+          setIsRedirecting(true);
+          // 장소 정보 제거 후 페이지 이동
           clearSelectedPlace();
           router.push(response.redirectUrl);
         },
